@@ -1,10 +1,10 @@
 {
-  "name": "angularjs-dropdown-multiselect",
-  "version": "1.5.2",
+  "name": "aa-angularjs-dropdown-multiselect",
+  "version": "1.6.1",
   "authors": [
     "Dotan Simha <dotansimha@gmail.com>"
   ],
-  "description": "AngularJS Dropdown Multiselect directive",
+  "description": "AngularJS Dropdown Multiselect directive - closeOnSelect implemented",
   "keywords": ["angular", "angularjs", "directive", "dropdown", "multiselect", "checklist", "list", "bootstrap", "checkbox"],
   "license": "MIT",
   "main": "src/angularjs-dropdown-multiselect.js",

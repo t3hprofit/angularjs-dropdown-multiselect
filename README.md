@@ -1,3 +1,6 @@
+
+## ! This version modified to support closeOnSelect functionality.
+
 # AngularJS Dropdown Multiselect
 This directive gives you a Bootstrap Dropdown with the power of AngularJS directives.
 

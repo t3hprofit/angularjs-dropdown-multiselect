@@ -30,8 +30,13 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                 template += '<li ng-show="settings.enableSearch" class="divider"></li>';
 
                 if (groups) {
-                    template += '<li ng-repeat-start="option in orderedItems | filter: searchFilter" ng-show="getPropertyForObject(option, settings.groupBy) !== getPropertyForObject(orderedItems[$index - 1], settings.groupBy)" role="presentation" class="dropdown-header">{{ getGroupTitle(getPropertyForObject(option, settings.groupBy)) }}</li>';
-                    template += '<li ng-repeat-end role="presentation">';
+                    if (checkboxes) {
+                        template += '<li ng-repeat-start="option in orderedItems | filter: searchFilter" ng-show="getPropertyForObject(option, settings.groupBy) !== getPropertyForObject(orderedItems[$index - 1], settings.groupBy)" role="presentation" class="dropdown-header"><label><input class="checkboxInput" type="checkbox" ng-click="groupCheckboxClick($event, getGroupTitle(getPropertyForObject(option, settings.groupBy)))" ng-checked="isGroupChecked(getGroupTitle(getPropertyForObject(option, settings.groupBy)))" /> {{ getGroupTitle(getPropertyForObject(option, settings.groupBy)) }}</label></li>';
+                        template += '<li ng-repeat-end role="presentation">';
+                    } else {
+                        template += '<li ng-repeat-start="option in orderedItems | filter: searchFilter" ng-show="getPropertyForObject(option, settings.groupBy) !== getPropertyForObject(orderedItems[$index - 1], settings.groupBy)" role="presentation" class="dropdown-header">{{ getGroupTitle(getPropertyForObject(option, settings.groupBy)) }}</li>';
+                        template += '<li ng-repeat-end role="presentation">';
+                    }
                 } else {
                     template += '<li role="presentation" ng-repeat="option in options | filter: searchFilter">';
                 }
@@ -63,6 +68,22 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
 
                 $scope.checkboxClick = function ($event, id) {
                     $scope.setSelectedItem(id);
+                    $event.stopImmediatePropagation();
+                };
+                
+                $scope.groupCheckboxClick = function($event, groupName) {
+                    if ($scope.isGroupChecked(groupName)) {
+                        var searchVal = JSON.parse('{"' + $scope.settings.groupBy +'": "' + groupName + '"}');
+                        var allGroup = _.where($scope.options,searchVal);
+                        $scope.selectedModel = _.xor(allGroup, $scope.selectedModel);   
+                    } else {
+                        angular.forEach($scope.options, function (value) {
+                            if (value[$scope.settings.groupBy] === groupName) {
+                                $scope.setSelectedItem(value[$scope.settings.idProp], true);
+                            }
+                        });
+                    }
+                    
                     $event.stopImmediatePropagation();
                 };
 
@@ -277,6 +298,15 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                         $scope.externalEvents.onItemSelect(finalObj);
                     }
                     if ($scope.settings.closeOnSelect) { $scope.open = false; }
+                };
+                
+                $scope.isGroupChecked = function(groupName) {
+                    var searchVal = JSON.parse('{"' + $scope.settings.groupBy +'": "' + groupName + '"}')
+                    var allGroup = _.where($scope.options,searchVal);
+                    var selectedGroup = _.where($scope.selectedModel, searchVal);
+                    var count = 0;
+                    _.forEach(selectedGroup, function(item) { if( _.contains(allGroup, item)) { count++; }; });
+                    return count === allGroup.length;
                 };
 
                 $scope.isChecked = function (id) {

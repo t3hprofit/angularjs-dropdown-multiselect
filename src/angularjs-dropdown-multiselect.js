@@ -31,7 +31,7 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
 
                 if (groups) {
                     if (checkboxes) {
-                        template += '<li ng-repeat-start="option in orderedItems | filter: searchFilter" ng-show="getPropertyForObject(option, settings.groupBy) !== getPropertyForObject(orderedItems[$index - 1], settings.groupBy)" role="presentation" class="dropdown-header"><label><input class="checkboxInput" type="checkbox" ng-click="groupCheckboxClick($event, getGroupTitle(getPropertyForObject(option, settings.groupBy)))" ng-checked="isGroupChecked(getGroupTitle(getPropertyForObject(option, settings.groupBy)))" /> {{ getGroupTitle(getPropertyForObject(option, settings.groupBy)) }}</label></li>';
+                        template += '<li ng-repeat-start="option in filteredItems" ng-show="getPropertyForObject(option, settings.groupBy) !== getPropertyForObject(filteredItems[$index - 1], settings.groupBy)" role="presentation" class="dropdown-header"><label><input class="checkboxInput" type="checkbox" ng-click="groupCheckboxClick($event, getGroupTitle(getPropertyForObject(option, settings.groupBy)))" ng-checked="isGroupChecked(getGroupTitle(getPropertyForObject(option, settings.groupBy)))" /> {{ getGroupTitle(getPropertyForObject(option, settings.groupBy)) }}</label></li>';
                         template += '<li ng-repeat-end role="presentation">';
                     } else {
                         template += '<li ng-repeat-start="option in orderedItems | filter: searchFilter" ng-show="getPropertyForObject(option, settings.groupBy) !== getPropertyForObject(orderedItems[$index - 1], settings.groupBy)" role="presentation" class="dropdown-header">{{ getGroupTitle(getPropertyForObject(option, settings.groupBy)) }}</li>';
@@ -133,13 +133,19 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                     $scope.$watch('options', function (newValue) {
                         if (angular.isDefined(newValue)) {
                             $scope.orderedItems = $filter('orderBy')(newValue, $scope.settings.groupBy);
+                            angular.copy($scope.orderedItems,$scope.filteredItems);
                         }
+                    });
+
+                    $scope.$watch('searchFilter', function (newValue) {
+                        $scope.filteredItems = $filter('filter')($scope.orderedItems, newValue);
                     });
                 }
 
                 angular.extend($scope.settings, $scope.extraSettings || []);
                 angular.extend($scope.externalEvents, $scope.events || []);
                 angular.extend($scope.texts, $scope.translationTexts);
+                angular.copy($scope.orderedItems,$scope.filteredItems);
 
                 $scope.singleSelection = $scope.settings.selectionLimit === 1;
 
@@ -235,6 +241,29 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                     } else {
                         return $scope.texts.buttonDefaultText;
                     }
+                };
+
+
+
+
+                $scope.showGroup = function(option,groupBy,orderedItem, orderedItems, idx){
+                    var i = idx;
+                    var prev = 0;
+                    if(i!==0){
+                        prev=i-1;
+                    }
+                    var ordItm = orderedItems[prev];
+                    var ordItms = orderedItems;
+                    var val1 = $scope.getPropertyForObject(option, groupBy);
+                    var val2 =  $scope.getPropertyForObject(orderedItem, groupBy);
+                    var ret = false;
+                    if(prev==0){
+                        ret = true;
+                    }else{
+                        ret = val1 !== val2;
+                    }
+
+                    return ret;
                 };
 
                 $scope.getPropertyForObject = function (object, property) {

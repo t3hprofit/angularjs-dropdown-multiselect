@@ -14,7 +14,8 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                 events: '=',
                 searchFilter: '=?',
                 translationTexts: '=',
-                groupBy: '@'
+                groupBy: '@',
+                orderBy: '@'
             },
             template: function (element, attrs) {
                 var checkboxes = attrs.checkboxes ? true : false;
@@ -61,7 +62,7 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
             },
             link: function ($scope, $element, $attrs) {
                 var $dropdownTrigger = $element.children()[0];
-                
+
                 $scope.toggleDropdown = function () {
                     $scope.open = !$scope.open;
                 };
@@ -70,12 +71,12 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                     $scope.setSelectedItem(id);
                     $event.stopImmediatePropagation();
                 };
-                
+
                 $scope.groupCheckboxClick = function($event, groupName) {
                     if ($scope.isGroupChecked(groupName)) {
                         var searchVal = JSON.parse('{"' + $scope.settings.groupBy +'": "' + groupName + '"}');
                         var allGroup = _.where($scope.options,searchVal);
-                        $scope.selectedModel = _.xor(allGroup, $scope.selectedModel);   
+                        $scope.selectedModel = _.xor(allGroup, $scope.selectedModel);
                     } else {
                         angular.forEach($scope.options, function (value) {
                             if (value[$scope.settings.groupBy] === groupName) {
@@ -83,7 +84,7 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                             }
                         });
                     }
-                    
+
                     $event.stopImmediatePropagation();
                 };
 
@@ -113,6 +114,7 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                     closeOnDeselect: false,
                     groupBy: $attrs.groupBy || undefined,
                     groupByTextProvider: null,
+                    orderBy: $attrs.orderBy || undefined,
                     smartButtonMaxItems: 0,
                     smartButtonTextConverter: angular.noop
                 };
@@ -129,10 +131,10 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
 
                 $scope.searchFilter = $scope.searchFilter || '';
 
-                if (angular.isDefined($scope.settings.groupBy)) {
+                if (angular.isDefined($scope.settings.orderBy)) {
                     $scope.$watch('options', function (newValue) {
                         if (angular.isDefined(newValue)) {
-                            $scope.orderedItems = $filter('orderBy')(newValue, $scope.settings.groupBy);
+                            $scope.orderedItems = $filter('orderBy')(newValue, $scope.settings.orderBy.split(','));
                             angular.copy($scope.orderedItems,$scope.filteredItems);
                         }
                     });
@@ -328,7 +330,7 @@ directiveModule.directive('ngDropdownMultiselect', ['$filter', '$document', '$co
                     }
                     if ($scope.settings.closeOnSelect) { $scope.open = false; }
                 };
-                
+
                 $scope.isGroupChecked = function(groupName) {
                     var searchVal = JSON.parse('{"' + $scope.settings.groupBy +'": "' + groupName + '"}')
                     var allGroup = _.where($scope.options,searchVal);

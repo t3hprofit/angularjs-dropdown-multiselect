@@ -12,8 +12,8 @@ config(['$routeProvider', '$locationProvider', '$compileProvider',
 
 
         var appPathRoute = '/';
-        var pagesPath = staticPath + 'javascripts/pages/';
-
+        //var pagesPath = staticPath + 'javascripts/pages/';
+        var pagesPath = appPathRoute + 'javascripts/pages/';
 
         $routeProvider.when('/', {
             templateUrl: pagesPath + 'home/home.html'
